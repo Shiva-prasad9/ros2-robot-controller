@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.substitutions import Command
@@ -53,15 +53,49 @@ def generate_launch_description():
         executable='parameter_bridge',
         arguments=[
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-            '/model/my_robot/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+            '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+            # Bridge ROS2 /cmd_vel to Gazebo /model/my_robot/cmd_vel
+            '/model/my_robot/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
         ],
         output='screen'
     )
 
+    # ── 5. Controller Spawners ─────────────────────────────────
+    joint_state_broadcaster = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=[
+            'joint_state_broadcaster',
+            '-c', '/controller_manager'
+        ],
+        output='screen'
+    )
+
+    diff_drive_controller = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=[
+            'diff_drive_controller',
+            '-c', '/controller_manager'
+        ],
+        output='screen'
+    )
+
+    # Remap /cmd_vel to Gazebo internal topic
+    cmd_vel_relay = Node(
+        package='topic_tools',
+        executable='relay',
+        arguments=['/cmd_vel', '/model/my_robot/cmd_vel'],
+        output='screen'
+    )
+    
     return LaunchDescription([
         gazebo,
         rsp,
         spawn,
         bridge,
+        cmd_vel_relay,
+        TimerAction(period=5.0, actions=[joint_state_broadcaster]),
+        TimerAction(period=6.0, actions=[diff_drive_controller]),
     ])

@@ -1,6 +1,5 @@
 controller_manager:
   ros__parameters:
-    use_sim_time: true
     update_rate: 100
 
     diff_drive_controller:
@@ -11,7 +10,6 @@ controller_manager:
 
 diff_drive_controller:
   ros__parameters:
-    use_sim_time: true
     left_wheel_names: ["left_wheel_joint"]
     right_wheel_names: ["right_wheel_joint"]
     wheel_separation: 0.35
@@ -23,5 +21,4 @@ diff_drive_controller:
     angular.z.max_velocity: 1.0
 
 joint_state_broadcaster:
-  ros__parameters:
-    use_sim_time: true
+  ros__parameters: {}
