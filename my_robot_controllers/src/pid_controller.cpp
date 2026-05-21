@@ -49,7 +49,7 @@ PidController::PidController()
   // ── Publisher ─────────────────────────────────────────────
   cmd_vel_pub_ =
     this->create_publisher<geometry_msgs::msg::Twist>(
-      "/cmd_vel", 10);
+      "/model/my_robot/cmd_vel", 10);
 
   RCLCPP_INFO(this->get_logger(), "PID Controller node started!");
   RCLCPP_INFO(this->get_logger(),
