@@ -10,8 +10,6 @@ workflow — from URDF modelling to physics simulation and custom C++ controller
 
 ## Architecture
 
-## Architecture
-
 ```mermaid
 graph TD
     A[my_robot_bringup<br/>launch orchestrator] --> B[my_robot_description<br/>URDF · Xacro · meshes]
