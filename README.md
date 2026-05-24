@@ -150,20 +150,18 @@ ros2 param set /impedance_controller m 0.2
 
 ## ROS2 Topic Graph
 
-## ROS2 Topic Graph
-
 ```mermaid
 graph LR
-    A[/cmd_vel_desired] --> B[pid_controller]
-    C[/odom] --> B
-    B --> D[/cmd_vel]
+    A["'/cmd_vel_desired'"] --> B["pid_controller"]
+    C["'/odom'"] --> B
+    B --> D["'/cmd_vel'"]
 
-    E[/desired_pose] --> F[impedance_controller]
+    E["'/desired_pose'"] --> F["impedance_controller"]
     C --> F
     F --> D
 
-    D --> G[ros_gz_bridge]
-    G --> H[Gazebo DiffDrive]
+    D --> G["ros_gz_bridge"]
+    G --> H["Gazebo DiffDrive"]
     H --> C
 ```
 ---
@@ -194,7 +192,6 @@ M = virtual mass (resistance to sudden changes)
 
 ---
 
-## Project Structure
 ## Project Structure
 
 ```
