@@ -10,16 +10,16 @@ workflow — from URDF modelling to physics simulation and custom C++ controller
 
 ## Architecture
 
-my_robot_bringup  (launch orchestrator)
-│
-├── my_robot_description   — URDF, Xacro, meshes, launch files
-│
-├── my_robot_simulation    — Gazebo + hardware interface
-│
-└── my_robot_controllers   — Custom C++ controller nodes
-├── pid_controller
-└── impedance_controller
+## Architecture
 
+```mermaid
+graph TD
+    A[my_robot_bringup<br/>launch orchestrator] --> B[my_robot_description<br/>URDF · Xacro · meshes]
+    A --> C[my_robot_simulation<br/>Gazebo · hardware interface]
+    A --> D[my_robot_controllers<br/>C++ controller nodes]
+    D --> E[pid_controller<br/>velocity tracking]
+    D --> F[impedance_controller<br/>position compliance]
+```
 ---
 
 ## Package Overview
@@ -150,16 +150,22 @@ ros2 param set /impedance_controller m 0.2
 
 ## ROS2 Topic Graph
 
-/cmd_vel_desired ──→ [pid_controller] ──→ /cmd_vel
-↑
-/odom
-/desired_pose ──→ [impedance_controller] ──→ /cmd_vel
-↑
-/odom
-/cmd_vel ──→ [ros_gz_bridge] ──→ Gazebo DiffDrive Plugin
-↓
-/odom (feedback)
+## ROS2 Topic Graph
 
+```mermaid
+graph LR
+    A[/cmd_vel_desired] --> B[pid_controller]
+    C[/odom] --> B
+    B --> D[/cmd_vel]
+
+    E[/desired_pose] --> F[impedance_controller]
+    C --> F
+    F --> D
+
+    D --> G[ros_gz_bridge]
+    G --> H[Gazebo DiffDrive]
+    H --> C
+```
 ---
 
 ## Controller Theory
@@ -189,6 +195,9 @@ M = virtual mass (resistance to sudden changes)
 ---
 
 ## Project Structure
+## Project Structure
+
+```
 ros2_ws/src/
 ├── my_robot_bringup/
 │   └── launch/
@@ -209,6 +218,7 @@ ros2_ws/src/
 │       ├── pid_controller.cpp
 │       └── impedance_controller.cpp
 └── my_robot_simulation/
+```
 
 ---
 
