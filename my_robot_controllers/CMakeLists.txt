@@ -37,4 +37,20 @@ install(DIRECTORY include/
   DESTINATION include
 )
 
+# ── Build impedance controller ─────────────────────────────
+add_executable(impedance_controller
+  src/impedance_controller.cpp
+)
+
+ament_target_dependencies(impedance_controller
+  rclcpp
+  geometry_msgs
+  nav_msgs
+)
+
+install(TARGETS
+  impedance_controller
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
