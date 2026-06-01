@@ -49,7 +49,7 @@ def generate_launch_description():
                 get_package_share_directory('ros_gz_sim'),
                 'launch', 'gz_sim.launch.py')
         ]),
-        launch_arguments={'gz_args': '-r -s empty.sdf'}.items()
+        launch_arguments={'gz_args': f'-r -s {os.path.join(desc_pkg, "worlds", "my_robot.world.sdf")}'}.items()
     )
 
     # ── 2. Robot State Publisher ──────────────────────────
@@ -83,6 +83,7 @@ def generate_launch_description():
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/model/my_robot/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+            '/imu/data_raw@sensor_msgs/msg/Imu[gz.msgs.IMU',
         ],
         output='screen'
     )
