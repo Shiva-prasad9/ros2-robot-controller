@@ -124,6 +124,31 @@
     <mu2>1.0</mu2>
   </gazebo>
 
+  <!-- ─── IMU ──────────────────────────────────────────────── -->
+  <!-- Mounted at geometric center of chassis top surface       -->
+  <!-- xyz = (base_length/2, 0, base_height/2) = (0.2, 0, 0.075) in chassis_link frame -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="0.8 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0"
+               iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child  link="imu_link"/>
+    <origin xyz="${base_length/2} 0 ${base_height/2}" rpy="0 0 0"/>
+  </joint>
+
   <!-- ─── Gazebo Diff Drive Plugin ──────────────────────────
        Built-in Gazebo plugin — no ros2_control needed.
        Subscribes to /cmd_vel and publishes /odom directly.
