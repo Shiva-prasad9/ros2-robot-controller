@@ -168,4 +168,30 @@
     </plugin>
   </gazebo>
 
+  <!-- ─── Gazebo IMU Sensor Plugin ──────────────────────────
+       Publishes sensor_msgs/Imu on /imu/data_raw at 100Hz.
+       Noise values representative of mid-grade MEMS IMU (MPU-6050
+       class). gz_frame_id must match imu_link defined in URDF above.
+  ──────────────────────────────────────────────────────────── -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <topic>/imu/data_raw</topic>
+      <gz_frame_id>imu_link</gz_frame_id>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.009</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.009</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.009</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.021</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.021</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.021</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
 </robot>
