@@ -12,13 +12,30 @@ workflow — from URDF modelling to physics simulation and custom C++ controller
 
 ```mermaid
 graph TD
-    A[my_robot_bringup<br/>launch orchestrator] --> B[my_robot_description<br/>URDF · Xacro · meshes]
-    A --> C[my_robot_simulation<br/>Gazebo · hardware interface]
+    A[my_robot_bringup<br/>launch orchestrator] --> B[my_robot_description<br/>URDF · Xacro · Gazebo world]
+    A --> C[my_robot_simulation<br/>Gazebo · ROS-GZ bridge]
     A --> D[my_robot_controllers<br/>C++ controller nodes]
+    A --> L[my_robot_localization<br/>EKF state estimation]
     D --> E[pid_controller<br/>velocity tracking]
     D --> F[impedance_controller<br/>position compliance]
+    C --> G[/odom]
+    C --> H[/imu/data_raw]
+    G --> L
+    H --> L
+    L --> I[/odometry/filtered]
 ```
 ---
+
+## Smoke Test Results
+
+45-second circular motion test (v=0.3 m/s, ω=0.5 rad/s):
+
+![EKF Smoke Test](my_robot_localization/data/results/smoke_test_results.png)
+
+- **Top left:** EKF filtered trajectory (red) is smoother than raw odometry (blue)
+- **Top right:** EKF suppresses ±0.8 m/s velocity spikes from zero-covariance odometry
+- **Bottom left:** Yaw variance converges to ~3e-3 rad² as IMU measurements accumulate
+- **Bottom right:** EKF correctly fuses IMU yaw rate while suppressing gyro noise
 
 ## Package Overview
 
@@ -55,6 +72,26 @@ Two custom C++ controller nodes:
 - Timed sequence ensures correct startup order
 - Configurable via launch arguments
 
+### my_robot_localization
+EKF-based state estimation fusing wheel odometry and IMU data.
+
+**CovarianceInjector** (`covariance_injector`)
+- Fixes zero-covariance output from Gazebo diff drive and IMU plugins
+- Republishes `/odom` → `/odom_with_covariance` with realistic encoder uncertainty
+- Republishes `/imu/data_raw` → `/imu/data` with realistic MEMS IMU uncertainty
+
+**EKF Node** (from `robot_localization`)
+- Fuses `/odom_with_covariance` (x, y, vyaw) + `/imu/data` (yaw, vyaw)
+- Publishes `/odometry/filtered` at 30Hz with `odom → base_footprint` TF
+- `two_d_mode: true` — constrains estimation to 2D plane
+
+**Sensor fusion pipeline:**
+```
+Gazebo IMU → /imu/data_raw → CovarianceInjector → /imu/data ──────┐
+                                                                    ├─► ekf_node → /odometry/filtered
+Gazebo Odom → /odom → CovarianceInjector → /odom_with_covariance ──┘
+```
+
 ---
 
 ## Requirements
@@ -65,6 +102,7 @@ Two custom C++ controller nodes:
 | ROS2 | Jazzy Jalisco |
 | Gazebo | Harmonic 8.x |
 | C++ | 17 |
+| robot_localization | Jazzy |
 
 ---
 
@@ -247,3 +285,7 @@ This project demonstrates:
 - ✅ Runtime parameter tuning via ROS2 params
 - ✅ Launch file orchestration
 - ✅ Git version control with meaningful commits
+- ✅ IMU sensor integration with Gazebo Harmonic sensor systems
+- ✅ EKF state estimation via robot_localization
+- ✅ Covariance injector — production-grade fix for zero-covariance plugins
+- ✅ Sensor fusion smoke test with quantitative plots

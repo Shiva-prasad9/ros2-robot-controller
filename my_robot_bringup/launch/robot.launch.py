@@ -49,7 +49,7 @@ def generate_launch_description():
                 get_package_share_directory('ros_gz_sim'),
                 'launch', 'gz_sim.launch.py')
         ]),
-        launch_arguments={'gz_args': '-r -s empty.sdf'}.items()
+        launch_arguments={'gz_args': f'-r -s {os.path.join(desc_pkg, "worlds", "my_robot.world.sdf")}'}.items()
     )
 
     # ── 2. Robot State Publisher ──────────────────────────
@@ -83,11 +83,22 @@ def generate_launch_description():
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/model/my_robot/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+            '/imu/data_raw@sensor_msgs/msg/Imu[gz.msgs.IMU',
         ],
         output='screen'
     )
 
-    # ── 5. PID Controller ─────────────────────────────────
+    # ── 5. EKF State Estimation ───────────────────────────────
+    ekf = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(
+                get_package_share_directory('my_robot_localization'),
+                'launch', 'ekf.launch.py'
+            )
+        ])
+    )
+
+    # ── 6. PID Controller ─────────────────────────────────
     pid_controller = Node(
         package='my_robot_controllers',
         executable='pid_controller',
@@ -100,7 +111,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ── 6. Impedance Controller ───────────────────────────
+    # ── 7. Impedance Controller ───────────────────────────
     impedance_controller = Node(
         package='my_robot_controllers',
         executable='impedance_controller',
@@ -141,4 +152,11 @@ def generate_launch_description():
             pid_controller,
             impedance_controller,
         ]),
+
+        # Start EKF after 5 seconds (bridge must be fully active)
+        TimerAction(period=5.0, actions=[
+            LogInfo(msg="Starting EKF state estimation..."),
+            ekf,
+        ]),
+        
     ])

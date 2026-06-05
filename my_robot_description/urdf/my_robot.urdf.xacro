@@ -124,6 +124,31 @@
     <mu2>1.0</mu2>
   </gazebo>
 
+  <!-- ─── IMU ──────────────────────────────────────────────── -->
+  <!-- Mounted at geometric center of chassis top surface       -->
+  <!-- xyz = (base_length/2, 0, base_height/2) = (0.2, 0, 0.075) in chassis_link frame -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="0.8 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0"
+               iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child  link="imu_link"/>
+    <origin xyz="${base_length/2} 0 ${base_height/2}" rpy="0 0 0"/>
+  </joint>
+
   <!-- ─── Gazebo Diff Drive Plugin ──────────────────────────
        Built-in Gazebo plugin — no ros2_control needed.
        Subscribes to /cmd_vel and publishes /odom directly.
@@ -141,6 +166,32 @@
       <frame_id>odom</frame_id>
       <child_frame_id>base_footprint</child_frame_id>
     </plugin>
+  </gazebo>
+
+  <!-- ─── Gazebo IMU Sensor Plugin ──────────────────────────
+       Publishes sensor_msgs/Imu on /imu/data_raw at 100Hz.
+       Noise values representative of mid-grade MEMS IMU (MPU-6050
+       class). gz_frame_id must match imu_link defined in URDF above.
+  ──────────────────────────────────────────────────────────── -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <topic>/imu/data_raw</topic>
+      <gz_frame_id>imu_link</gz_frame_id>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.009</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.009</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.009</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.021</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.021</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.021</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
   </gazebo>
 
 </robot>
