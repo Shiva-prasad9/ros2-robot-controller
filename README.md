@@ -18,9 +18,8 @@ graph TD
     A --> L[my_robot_localization<br/>EKF state estimation]
     D --> E[pid_controller<br/>velocity tracking]
     D --> F[impedance_controller<br/>position compliance]
-    G --> L
-    H --> L
-    L --> I[/odometry/filtered]
+    C --> L
+    L --> M[Filtered Odometry Output]
 ```
 ---
 
