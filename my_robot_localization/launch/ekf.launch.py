@@ -9,12 +9,20 @@ def generate_launch_description():
     pkg = get_package_share_directory('my_robot_localization')
     ekf_config = os.path.join(pkg, 'config', 'ekf.yaml')
 
+    odom_injector = Node(
+        package='my_robot_localization',
+        executable='covariance_injector',
+        name='covariance_injector',
+        output='screen',
+    )
+
+
     ekf_node = Node(
         package='robot_localization',
         executable='ekf_node',
         name='ekf_filter_node',
         output='screen',
-        parameters=[ekf_config],
+        parameters=[ekf_config, {'use_sim_time': True}],
         remappings=[
             ('odometry/filtered', '/odometry/filtered'),
             ('accel/filtered',    '/accel/filtered'),
@@ -22,5 +30,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        odom_injector,
         ekf_node
     ])

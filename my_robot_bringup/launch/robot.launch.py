@@ -88,7 +88,17 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ── 5. PID Controller ─────────────────────────────────
+    # ── 5. EKF State Estimation ───────────────────────────────
+    ekf = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(
+                get_package_share_directory('my_robot_localization'),
+                'launch', 'ekf.launch.py'
+            )
+        ])
+    )
+
+    # ── 6. PID Controller ─────────────────────────────────
     pid_controller = Node(
         package='my_robot_controllers',
         executable='pid_controller',
@@ -101,7 +111,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ── 6. Impedance Controller ───────────────────────────
+    # ── 7. Impedance Controller ───────────────────────────
     impedance_controller = Node(
         package='my_robot_controllers',
         executable='impedance_controller',
@@ -142,4 +152,11 @@ def generate_launch_description():
             pid_controller,
             impedance_controller,
         ]),
+
+        # Start EKF after 5 seconds (bridge must be fully active)
+        TimerAction(period=5.0, actions=[
+            LogInfo(msg="Starting EKF state estimation..."),
+            ekf,
+        ]),
+        
     ])
