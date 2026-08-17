@@ -111,7 +111,7 @@ mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 
 # 2. Clone repository
-git clone https://github.com/YOUR_USERNAME/ros2-robot-controller.git .
+git clone https://github.com/Shiva-prasad9/ros2-robot-controller.git .
 
 # 3. Install dependencies
 sudo apt install ros-jazzy-ros-gz \
